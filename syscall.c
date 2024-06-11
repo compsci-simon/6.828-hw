@@ -103,7 +103,6 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-extern int sys_date(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -127,7 +126,6 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-[SYS_date]	  sys_date
 };
 
 void
@@ -138,71 +136,6 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-	switch (num) {
-		case SYS_fork:
-			cprintf("fork\n");
-			break;
-		case SYS_exit:
-			cprintf("exit\n");
-			break;
-		case SYS_wait:
-			cprintf("wait\n");
-			break;
-		case SYS_pipe:
-			cprintf("pipe\n");
-			break;
-		case SYS_read:
-			cprintf("read\n");
-			break;
-		case SYS_kill:
-			cprintf("kill\n");
-			break;
-		case SYS_exec:
-			cprintf("exec\n");
-			break;
-		case SYS_fstat:
-			cprintf("fstat\n");
-			break;
-		case SYS_chdir:
-			cprintf("chdir\n");
-			break;
-		case SYS_dup:
-			cprintf("dup\n");
-			break;
-		case SYS_getpid:
-			cprintf("getpid\n");
-			break;
-		case SYS_sbrk:
-			cprintf("sbrk\n");
-			break;
-		case SYS_sleep:
-			cprintf("sleep\n");
-			break;
-		case SYS_uptime:
-			cprintf("uptime\n");
-			break;
-		case SYS_open:
-			cprintf("open\n");
-			break;
-		case SYS_write:
-			cprintf("write\n");
-			break;
-		case SYS_mknod:
-			cprintf("mknod\n");
-			break;
-		case SYS_unlink:
-			cprintf("unlink\n");
-			break;
-		case SYS_link:
-			cprintf("link\n");
-			break;
-		case SYS_mkdir:
-			cprintf("mkdir\n");
-			break;
-		case SYS_close:
-			cprintf("close\n");
-			break;
-	}
     curproc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",

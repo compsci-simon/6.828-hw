@@ -14,6 +14,8 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+int mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm);
+
 void
 tvinit(void)
 {
@@ -79,6 +81,25 @@ trap(struct trapframe *tf)
     break;
 
   //PAGEBREAK: 13
+  case T_PGFLT:
+	{
+		unsigned int page_frame = PGROUNDDOWN(rcr2());
+		struct proc *curproc = myproc();
+		char *mem = kalloc();
+		cprintf("Allocated memory at 0x%x\n", page_frame);
+		if(mem == 0){
+		  cprintf("allocuvm out of memory\n");
+		  myproc()->killed = 1;
+		}
+		memset(mem, 0, PGSIZE);
+		if(mappages(curproc->pgdir, (char*)page_frame, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
+		  cprintf("allocuvm out of memory (2)\n");
+		  kfree(mem);
+		  myproc()->killed = 1;
+		}
+		cprintf("mapped memory\n");
+	}
+	break;
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
       // In kernel, it must be our mistake.

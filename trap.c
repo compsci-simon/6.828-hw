@@ -38,6 +38,8 @@ idtinit(void)
 void
 trap(struct trapframe *tf)
 {
+  char *mem;
+  uint a;
   if(tf->trapno == T_SYSCALL){
     if(myproc()->killed)
       exit();
@@ -82,23 +84,11 @@ trap(struct trapframe *tf)
 
   //PAGEBREAK: 13
   case T_PGFLT:
-	{
-		unsigned int page_frame = PGROUNDDOWN(rcr2());
-		struct proc *curproc = myproc();
-		char *mem = kalloc();
-		cprintf("Allocated memory at 0x%x\n", page_frame);
-		if(mem == 0){
-		  cprintf("allocuvm out of memory\n");
-		  myproc()->killed = 1;
-		}
-		memset(mem, 0, PGSIZE);
-		if(mappages(curproc->pgdir, (char*)page_frame, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
-		  cprintf("allocuvm out of memory (2)\n");
-		  kfree(mem);
-		  myproc()->killed = 1;
-		}
-		cprintf("mapped memory\n");
-	}
+	a = rcr2();
+	a = PGROUNDDOWN(a);
+	mem = kalloc();
+	memset(mem, 0, PGSIZE);
+	mappages(myproc()->pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U);
 	break;
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
